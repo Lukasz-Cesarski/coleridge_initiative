@@ -1,0 +1,12 @@
+kaggle
+numpy
+pandas
+matplotlib
+jupyterlab
+torch
+spacy
+seaborn
+transformers
+fuzzywuzzy
+python-Levenshtein
+tqdm
