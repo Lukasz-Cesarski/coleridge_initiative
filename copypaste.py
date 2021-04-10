@@ -15,6 +15,7 @@ from copy import deepcopy
 
 LABEL_DT = "DT"  # dataset_title
 MP_PROCESSES = 6
+MP_PROCESSES = 6
 
 def parse_article(sort_idx, path, df_train):
     ### ARTICLES ###
@@ -83,6 +84,7 @@ def parse_article(sort_idx, path, df_train):
         list_raw_cumsum = raw_cumsum.tolist()
 
         if clean_matches:
+            # clean_matches = deoverlap(clean_matches)
             for clean_match in clean_matches:
                 clean_start_char = clean_match["start"]
                 clean_end_char = clean_match["end"]
@@ -133,7 +135,7 @@ def preprocess_data(data_dir, save_path):
     df_train = pd.read_csv(train_file)
     start = datetime.now()
     articles = []
-    # train_files = train_files[:400]
+    train_files = train_files[:100]
     BATCH_SIZE = 2000
     with open(save_path, "w") as fw:
         for tfs in tqdm(range(0, len(train_files), BATCH_SIZE)):

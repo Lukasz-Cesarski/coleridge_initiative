@@ -99,6 +99,27 @@ class JSONLReader:
             yield self._process(entry)
 
 
+def deoverlap(matches):
+    deover_matches = []
+    for this_match in matches:
+        for match_i in matches:
+            if this_match == match_i:
+                continue  # self
+            if this_match["start"] >= match_i["end"]:
+                continue  # located left
+            if this_match["end"] <= match_i["start"]:
+                continue  # loacted right
+            start_diff = this_match["start"] - match_i["start"]
+            end_diff = this_match["end"] - match_i["end"]
+            if start_diff >= 0 and end_diff <= 0:
+                break  # hidden inside other match
+            if start_diff * end_diff > 0:
+                raise ValueError(f"{this_match}{match_i}:{start_diff}:{end_diff}")
+        else:
+            deover_matches.append(this_match)
+    return deover_matches
+
+
 # def find_matches_for_instance(instance: pd.Series, clean_function: Optional[Callable] = None):
 #     """
 #     1. Find corresponding article
