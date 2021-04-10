@@ -1,8 +1,9 @@
 import json
 import re
 import os
+from pprint import pprint
 import pandas as pd
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict, Iterable, Any, Generator
 from datetime import datetime
 
 
@@ -44,6 +45,58 @@ def jaccard_similarity(s1, s2):
     intersection = len(list(set(l1).intersection(l2)))
     union = (len(l1) + len(l2)) - intersection
     return float(intersection) / union
+
+
+def describe_article(article):
+    instances = article["instances"]
+    print(f"INSTANCES: {len(instances)}")
+    pprint(instances)
+    print("\n\n")
+    print("MATCHES")
+    docs = []
+    for raw_part, clean_part in zip(article["paper"], article["paper_clean"]):
+        clean_matches = clean_part["matches"]
+        raw_matches = raw_part["matches"]
+        assert bool(clean_matches) == bool(raw_matches)
+        clean_txt = clean_part["text"]
+        raw_txt = raw_part["text"]
+        clean_tokens = clean_txt.split()
+        raw_tokens = raw_txt.split()
+        # wordmap = clean_part["wordmap"]
+        if clean_matches:
+            docs.append(
+                {"text": clean_txt,
+                 "ents": clean_matches,
+                 "title": clean_part["section_title"]})
+            docs.append(
+                {"text": raw_txt,
+                 "ents": raw_matches,
+                 "title": raw_part["section_title"]})
+            for c_match, r_match in zip(clean_matches, raw_matches):
+                c_text = clean_txt[c_match["start"]:c_match["end"]]
+                c_tokens = clean_tokens[c_match["start_word"]:c_match["end_word"]]
+                r_text = raw_txt[r_match["start"]:r_match["end"]]
+                r_tokens = raw_tokens[r_match["start_word"]:r_match["end_word"]]
+                print("c_text   ", c_text)
+                print("c_tokens ", c_tokens)
+                print("r_text   ", r_text)
+                print("r_tokens ", r_tokens)
+                print()
+
+
+class JSONLReader:
+    """Example data reader that reads jsonl entries"""
+
+    def __init__(self, data: Iterable[Any], *args: Any) -> None:
+        self.data = data
+        self.args = args
+
+    def _process(self, entry: str) -> Dict[str, Any]:
+        return json.loads(entry)
+
+    def __iter__(self) -> Generator[Any, None, None]:
+        for entry in self.data:
+            yield self._process(entry)
 
 
 # def find_matches_for_instance(instance: pd.Series, clean_function: Optional[Callable] = None):
